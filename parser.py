@@ -66,4 +66,58 @@ for (src, dst), count in pair_counts.items():
         })
     return alerts
 
+def parse_dns_log(filepath):
+    """
+    Reads DNS log and returns a list of queries.
+    """
+    queries = []
+    pattern = re.compile(
+        r"(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})"
+        r"CLIENT=([\d.]+) QUERY=(\S+) TYPE=(\w+)"
+    )
+
+    with open(filepath, "r") as f:
+        for line in f:
+            match = pattern.search(line)
+            if match:
+                queries.append({
+                    "timestamp":match.group(1),
+                    "client":match.group(2),
+                    "query":match.group(3),
+                    "type":match.group(4),
+                })
+    return queries
+
+def detect_dns_tunneling(queries):
+    """
+    Finds DFNS queries where the subdomain is unusually long.
+    Attackers encode data in subdomains to exfiltrate it - the subdomains end up being long random-looking strings.
+    """
+    alerts = []
+    for q in queries:
+        subdomain = q[queries].split(".")[0] #grab the part before the first dot 
+        if len(subdomain) > DNS_LENGTH_THRESHOLD:
+            alerts.append({
+                "alert_type": "DNS_TUNNELING",
+                "severity": "MEDIUM",
+                "client_ip": q["client"],
+                "query": q["query"],
+                "subdomain_length": len(subdomain),
+                "description": len(subdomain),
+                "description": f"Unusually long DNS subdomain ({len(subdomain)} chars) from {q['client']}"
+                "ioc": q["query"],
+            })
+    return alerts
+
+def check_virustotal(ioc):
+    """
+    Takes an ip and check it against virus total.
+    Returns how many security vendours flagged it as malicious.
+    """
+    if not VT_API_KEY:
+        print(" [!] No VirusTotal API key found, skipping enrichment")
+        return None
+    headers = {"x-apikey": VT_API_KEY}
+    #        
+
        
