@@ -118,6 +118,13 @@ def check_virustotal(ioc):
         print(" [!] No VirusTotal API key found, skipping enrichment")
         return None
     headers = {"x-apikey": VT_API_KEY}
-    #        
+  
+    #virusTotal has different endpoints for IPs vs Domains
+    if re.match(r"^\d{1,3}(\.\d{1,3}){3}$", ioc):
+        url = f"https://www.virustotal.com/api/v3/ip_addresses/{ioc}"
+    else:
+        url = f"https://www.virustotal.com/api/v3/domains/{ioc}"
+    
+            
 
        
