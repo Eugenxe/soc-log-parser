@@ -1,0 +1,7 @@
+2026-06-01 08:01:05 CLIENT=192.168.1.10 QUERY=google.com TYPE=A
+2026-06-01 08:01:10 CLIENT=192.168.1.10 QUERY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.evildomain.com TYPE=A
+2026-06-01 08:02:00 CLIENT=192.168.1.15 QUERY=microsoft.com TYPE=A
+2026-06-01 08:02:30 CLIENT=192.168.1.20 QUERY=c2server-totally-not-malicious.ru TYPE=A
+2026-06-01 08:03:00 CLIENT=192.168.1.10 QUERY=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.evildomain.com TYPE=A
+2026-06-01 08:04:00 CLIENT=192.168.1.15 QUERY=github.com TYPE=A
+2026-06-01 08:05:00 CLIENT=192.168.1.20 QUERY=cccccccccccccccccccccccccccccccccccccccccccccccccccccc.evildomain.com TYPE=A
