@@ -124,7 +124,28 @@ def check_virustotal(ioc):
         url = f"https://www.virustotal.com/api/v3/ip_addresses/{ioc}"
     else:
         url = f"https://www.virustotal.com/api/v3/domains/{ioc}"
+
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            stats = data["data"]["attributes"]["last_analysis_stats"]
+            return {
+                "malicious": stats.get("malicous", o)
+                "suspicious": stats.get("suspicious", o)
+                "harmless": stats.get("harmless", o)
+                "undetected": stats.get("undetected", o)
+            }
+        elif response.status_code == 404:
+            return{"note": "IOC not found in VirusTotal database"}
+        else:
+            return {"error": f"VT returned status {response.status_code}"}
+    except Exception as e:
+        return{"error": str(e)}
+
+def enrich_alerts(alerts):
+    """
     
-            
+    """
 
        
