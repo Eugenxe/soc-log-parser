@@ -29,42 +29,42 @@ def parse_firewall_log(filepath):
         r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})"
         r"SRC=([\d.]+) DST=([\d.]+) PROTO=(\w+) DPT=(\d) ACTION=(\w+)"        
     )
-with open(filepath, "r") as f:
-    for line in f:
-        match = pattern.search(line)
-        if match:
-            connections.append({
-                "timestamp": match.group(1),
-                "src": match.group(2),
-                "dst": match.group(3),
-                "proto": match.group(4),
-                "port": int(match.group(5)),
-                "action": match.group(6),
-            })
-    return Connections 
+    with open(filepath, "r") as f:
+        for line in f:
+            match = pattern.search(line)
+            if match:
+                connections.append({
+                    "timestamp": match.group(1),
+                    "src": match.group(2),
+                    "dst": match.group(3),
+                    "proto": match.group(4),
+                    "port": int(match.group(5)),
+                    "action": match.group(6)
+                    })
+                return connections 
 
 def detect_beaconing(connections):
     """
     Looks for a source IP hitting the same desination IP more than the BEACON_THRESHOLD times. Classic C2 beaconing pattern.
     """
-pair_counts = defaultdict(int)
-for conn in connections:
-    key = (conn["src"], conn["dst"])
-    pair_counts[key] += 1
-
-alerts = []
-for (src, dst), count in pair_counts.items():
-    if count >= BEACON_THRESHOLD:
-        alerts.append({
-            "alert_type": "BEACONING",
-            "severity": "HIGH",
-            "SRC_IP": src,
-            "dst_ip": dst,
-            "connections": count,
-            "desciption": f"{src} connected to {dst} times - pssible C2 beaconing"
-            "ioc": dst #the suspicious IP we'll check on VirusTotal
-        })
-    return alerts
+    pair_counts = defaultdict(int)
+    for conn in connections:
+        key = (conn["src"], conn["dst"])
+        pair_counts[key] += 1
+        
+        alerts = []
+        for (src, dst), count in pair_counts.items():
+            if count >= BEACON_THRESHOLD:
+                alerts.append({
+                    "alert_type": "BEACONING",
+                    "severity": "HIGH",
+                    "SRC_IP": src,
+                    "dst_ip": dst,
+                    "connections": count,
+                    "desciption": f"{src} connected to {dst} times - pssible C2 beaconing",
+                    "ioc": dst #the suspicious IP we'll check on VirusTotal
+                    })
+                return alerts
 
 def parse_dns_log(filepath):
     """
@@ -104,8 +104,8 @@ def detect_dns_tunneling(queries):
                 "query": q["query"],
                 "subdomain_length": len(subdomain),
                 "description": len(subdomain),
-                "description": f"Unusually long DNS subdomain ({len(subdomain)} chars) from {q['client']}"
-                "ioc": q["query"],
+                "description": f"Unusually long DNS subdomain ({len(subdomain)} chars) from {q['client']}",
+                "ioc": q["query"]
             })
     return alerts
 
@@ -131,9 +131,9 @@ def check_virustotal(ioc):
             data = response.json()
             stats = data["data"]["attributes"]["last_analysis_stats"]
             return {
-                "malicious": stats.get("malicous", o)
-                "suspicious": stats.get("suspicious", o)
-                "harmless": stats.get("harmless", o)
+                "malicious": stats.get("malicous", o),
+                "suspicious": stats.get("suspicious", o),
+                "harmless": stats.get("harmless", o),
                 "undetected": stats.get("undetected", o)
             }
         elif response.status_code == 404:
@@ -145,7 +145,52 @@ def check_virustotal(ioc):
 
 def enrich_alerts(alerts):
     """
-    
+    Goes through each alert, checks the IOC on VirusTotal and adds the results to the alert
     """
+    print(f"\n[*] Enriching {len(alerts)} alerts via VirusTotal....")
+    for i, alert in enumerate(alerts):
+        ioc = alert.get("ioc", "")
+        print(f" [{i+1}/{len(alerts)}] Checking {ioc}...")
+        vt_result = check_virustotal(ioc)
+        alert["virustotal"] = vt_result
+        #free VT API allows 4 requests/minute , so we wait between calls 
+        time.sleep(16)
+    return alerts
 
+def save_output(alerts):
+    """Saves the final alerts to JSON file"""
+    os.mkdirs("output", exist_ok= True)
+    with open(OUTPUT_FILE, "w") as f:
+        json.dump(alerts, f, indent=2)
+    print(f"\n[+] Saved {len(alerts)} alerts to {OUTPUT_FILE}")
+
+def main():
+    print("="*55)
+    print(" Soc log parser and alert enrichment tool")
+    print(f" Run time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("="*55)
+
+    #parse logs
+    print("\n[*] Parsing firewall log...")
+    Connections = parse_firewall_log(FIREWALL_LOG)
+    print(f"Found {len(queries)} DNS queries")
+
+    #Detect threats
+    print("\n[*] Running detection rules...")
+    beacon_alerts = detect_beaconing(connections)
+    dns_alerts = detect_dns_tunneling(queries)
+    all_alerts = beacon_alerts + dns_alerts
+    print(f" Beaconing alerts: {len(beacon_alerts)}")
+    print(f" DNS tunneling alerts: {len(dns_alerts)}")
+    print(f" Total alerts: {len(all_alerts)}")
+
+    #Enrich with VirusTotal
+    all_alerts = enrich_alerts(all_alerts)
+
+    #save output
+    save_output(all_alerts)
+    print("\n[+] Done. Check output/alerts.json for results.")
+
+if __name__ == '__main__':
+    main()
        
