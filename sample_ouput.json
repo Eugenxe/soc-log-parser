@@ -1,0 +1,62 @@
+[
+  {
+    "alert_type": "BEACONING",
+    "severity": "HIGH",
+    "src_ip": "192.168.1.10",
+    "dst_ip": "185.220.101.45",
+    "connections": 6,
+    "description": "192.168.1.10 connected to 185.220.101.45 6 times - possible C2 beaconing",
+    "ioc": "185.220.101.45",
+    "virustotal": {
+      "malicious": 17,
+      "suspicious": 4,
+      "harmless": 41,
+      "undetected": 29
+    }
+  },
+  {
+    "alert_type": "DNS_TUNNELING",
+    "severity": "MEDIUM",
+    "client_ip": "192.168.1.10",
+    "query": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.evildomain.com",
+    "subdomain_length": 54,
+    "description": "Unusually long DNS subdomain (54 chars) from 192.168.1.10",
+    "ioc": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.evildomain.com",
+    "virustotal": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 0,
+      "undetected": 91
+    }
+  },
+  {
+    "alert_type": "DNS_TUNNELING",
+    "severity": "MEDIUM",
+    "client_ip": "192.168.1.10",
+    "query": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.evildomain.com",
+    "subdomain_length": 53,
+    "description": "Unusually long DNS subdomain (53 chars) from 192.168.1.10",
+    "ioc": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.evildomain.com",
+    "virustotal": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 0,
+      "undetected": 91
+    }
+  },
+  {
+    "alert_type": "DNS_TUNNELING",
+    "severity": "MEDIUM",
+    "client_ip": "192.168.1.20",
+    "query": "cccccccccccccccccccccccccccccccccccccccccccccccccccccc.evildomain.com",
+    "subdomain_length": 54,
+    "description": "Unusually long DNS subdomain (54 chars) from 192.168.1.20",
+    "ioc": "cccccccccccccccccccccccccccccccccccccccccccccccccccccc.evildomain.com",
+    "virustotal": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 0,
+      "undetected": 91
+    }
+  }
+]
