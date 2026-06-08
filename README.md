@@ -259,3 +259,29 @@ Potential enhancements include:
 ## Educational Purpose
 
 This project was developed as a cybersecurity portfolio project to demonstrate Security Operations Center (SOC) analyst skills and the automation of common blue-team workflows using Python.
+
+## Cyber Kill Chain Mapping
+
+| Alert Type    | Kill Chain Stage         | Why It Matters                          |
+|---------------|--------------------------|------------------------------------------|
+| Beaconing     | Command & Control (C2)   | Malware checking in with attacker server |
+| DNS Tunneling | Exfiltration             | Data being smuggled out via DNS queries  |
+
+## How to Run
+
+1. Clone the repo
+   git clone https://github.com/Eugenxe/soc-log-parser.git
+   cd soc-log-parser
+
+2. Install dependencies
+   pip install requests python-dotenv
+
+3. Add your VirusTotal API key
+   Create a .env file and add:
+   VIRUSTOTAL_API_KEY=your_key_here
+
+4. Run the parser
+   python parser.py
+
+5. Check results
+   output/alerts.json
